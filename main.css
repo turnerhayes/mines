@@ -1,0 +1,83 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+}
+
+html {
+  font-size: 14px;
+}
+
+.grid-container {
+  font-size: 3em;
+}
+
+.grid-container.won::after {
+  content: "😎";
+  font-size: 5em;
+  color: yellow;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  line-height: 1em;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.grid {
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.grid td {
+  border: 1px inset black;
+  width: 1em;
+  min-width: 1em;
+  max-width: 1em;
+  height: 1em;
+  min-height: 1em;
+  max-height: 1em;
+  line-height: 0;
+
+  background-color: gray;
+}
+
+.grid td.revealed {
+  background-color: transparent;
+}
+
+/* DEBUG */
+.grid td:not(.revealed)::before {
+  content: attr(data-content);
+  color: white;
+}
+/* END DEBUG */
+
+.grid td.flagged:not(.revealed)::before {
+  content: "⚑";
+}
+
+.grid td.flagged.uncertain:not(.revealed)::before {
+  content: "?";
+}
+
+.grid td.flagged.revealed.💣 {
+  color: green;
+}
+
+.grid td.revealed.💣 {
+  color: red;
+}
+
+.grid td.revealed.💣.last-move {
+  background-color: red;
+  color: white;
+}
+
+.mine {
+  font-size: 0.6em;
+}
