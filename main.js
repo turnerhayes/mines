@@ -8,11 +8,14 @@
       .querySelector('[name="height"]').valueAsNumber;
     const mineCount = controlsContainer
       .querySelector('[name="num_mines"]').valueAsNumber;
+    const protectFirstClick = controlsContainer
+      .querySelector('[name="protect_first"]').checked;
     
     return {
       width,
       height,
       mineCount,
+      protectFirstClick,
     };
   }
 

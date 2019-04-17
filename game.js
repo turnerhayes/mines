@@ -45,6 +45,14 @@
       this.isRevealed = isRevealed;
 
       this._adjacentMines = null;
+
+      this.grid.on(
+        "mine-moved",
+        () => {
+          // Invalidate adjacentMines cache
+          this._adjacentMines = null;
+        }
+      );
     }
 
     get adjacentMines() {
@@ -94,6 +102,8 @@
 
       this._matrix = [];
 
+      this._emitter = new EventEmitter3();
+
       for (let rowNum = 0; rowNum < this.height; rowNum++) {
         const row = [];
 
@@ -106,6 +116,18 @@
 
         this._matrix.push(row);
       }
+    }
+
+    on(eventName, handler, context) {
+      this._emitter.on(eventName, handler, context);
+    }
+
+    once(eventName, handler, context) {
+      this._emitter.once(eventName, handler, context);
+    }
+
+    off(eventName, handler) {
+      this._emitter.off(eventName, handler);
     }
 
     /**
@@ -125,6 +147,35 @@
       this.get(position).content = BOMB;
     }
 
+    moveMine(cell) {
+      let newPosition = new Position([0, 0]);
+
+      let newCell = this.get(newPosition);
+
+      while (newCell.content === BOMB) {
+        let newColNum = newPosition.column + 1;
+        let newRowNum = newPosition.row;
+
+        if (newColNum >= this.width) {
+          newRowNum += 1;
+          newColNum = newColNum % this.width;
+        }
+
+        newPosition = new Position([newColNum, newRowNum]);
+        newCell = this.get(newPosition);
+      }
+      
+      this.addMineAt(newPosition);
+      cell.content = undefined;
+
+      this._emitter.emit("mine-moved", {
+        grid: this,
+        fromCell: cell,
+        toCell: newCell,
+      });
+
+      return newCell;
+    }
 
     getUnrevealedCells() {
       return this._matrix.reduce(
@@ -149,6 +200,7 @@
       mineCount,
       width,
       height,
+      protectFirstClick = false,
     }) {
       this.grid = Game._createGameGrid({
         mineCount,
@@ -156,8 +208,11 @@
         height,
       });
 
+      this.protectFirstClick = protectFirstClick;
+
       this._won = false;
       this._lost = false;
+      this._started = false;
 
       this._emitter = new EventEmitter3();
     }
@@ -178,6 +233,10 @@
 
     get isOver() {
       return this.won || this.lost;
+    }
+
+    get isStarted() {
+      return this._started;
     }
 
     on(eventName, handler, context) {
@@ -300,6 +359,18 @@
 
       if (cell.isFlagged) {
         return null;
+      }
+
+      if (!this.isStarted) {
+        if (this.protectFirstClick && cell.content === BOMB) {
+          const newCell = this.grid.moveMine(cell);
+          /// DEBUG
+          delete this._getCellElement(cell).dataset.content;
+          this._getCellElement(newCell).dataset.content = BOMB;
+          /// END DEBUG
+        }
+
+        this._started = true;
       }
 
       const cellContent = this.revealCell(cell);
