@@ -22,10 +22,9 @@ html {
   position: relative;
 }
 
-.grid-container.won::after {
-  content: "😎";
+.grid-container.won::after,
+.grid-container.lost::after {
   font-size: 5em;
-  color: yellow;
   position: absolute;
   top: 0;
   left: 0;
@@ -34,29 +33,26 @@ html {
   line-height: 1em;
   background: rgba(255, 255, 255, 0.9);
   text-align: center;
+}
+
+.grid-container.won::after {
+  content: "😎";
+  color: yellow;
 }
 
 .grid-container.lost::after {
   content: "😞";
-  font-size: 5em;
   color: red;
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  line-height: 1em;
-  background: rgba(255, 255, 255, 0.9);
-  text-align: center;
 }
 
 .grid {
   table-layout: fixed;
-  border-collapse: collapse;
+  /* border-collapse: collapse; */
+  border-spacing: 0;
 }
 
 .grid td {
-  border: 1px inset black;
+  border: 2px outset gray;
   width: 1em;
   min-width: 1em;
   max-width: 1em;
@@ -64,12 +60,17 @@ html {
   min-height: 1em;
   max-height: 1em;
   line-height: 0;
-
   background-color: gray;
+  text-align: center;
 }
 
 .grid td.revealed {
   background-color: transparent;
+  border: 1px solid black;
+}
+
+.grid td .cell-content {
+  font-size: 0.5em;
 }
 
 /* DEBUG */
@@ -79,15 +80,15 @@ html {
 }
 /* END DEBUG */
 
-.grid td.flagged:not(.revealed)::before {
+.grid td.flagged::before {
   content: "⚑";
 }
 
-.grid td.flagged.uncertain:not(.revealed)::before {
-  content: "?";
+.grid td.flagged {
+  color: white;
 }
 
-.grid td.flagged.revealed.💣 {
+.grid.over td.flagged {
   color: green;
 }
 
@@ -95,7 +96,7 @@ html {
   color: red;
 }
 
-.grid td.revealed.💣.last-move {
+.grid.over td.revealed.💣.last-move {
   background-color: red;
   color: white;
 }
