@@ -8,11 +8,32 @@
   <link rel="stylesheet" href="./main.css" />
 </head>
 <body>
-  <div class="grid-container">
-    <table class="grid">
-      <tbody>
-      </tbody>
-    </table>
+  <div class="main">
+    <div class="grid-container">
+      <table class="grid">
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+    <div class="controls">
+      <div class="inputs">
+        <label>
+          Width: 
+          <input type="number" value="10" name="width" />
+        </label>
+        <label>
+          Height: 
+          <input type="number" value="10" name="height" />
+        </label>
+        <label>
+          Number of mines: 
+          <input type="number" value="15" name="num_mines" />
+        </label>
+      </div>
+      <button type="button" class="reload-button">
+        ↺
+      </button>
+    </div>
   </div>
 
   <script src="./main.js"></script>

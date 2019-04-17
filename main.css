@@ -11,8 +11,15 @@ html {
   font-size: 14px;
 }
 
+.main {
+  display: flex;
+  flex-direction: row;
+}
+
 .grid-container {
   font-size: 3em;
+  display: inline-block;
+  position: relative;
 }
 
 .grid-container.won::after {
@@ -26,6 +33,21 @@ html {
   right: 0;
   line-height: 1em;
   background: rgba(255, 255, 255, 0.9);
+  text-align: center;
+}
+
+.grid-container.lost::after {
+  content: "😞";
+  font-size: 5em;
+  color: red;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  line-height: 1em;
+  background: rgba(255, 255, 255, 0.9);
+  text-align: center;
 }
 
 .grid {
@@ -80,4 +102,20 @@ html {
 
 .mine {
   font-size: 0.6em;
+}
+
+.controls [name="width"],
+.controls [name="height"],
+.controls [name="num_mines"] {
+  width: 4em;
+}
+
+.controls .inputs {
+  display: flex;
+  flex-direction: column;
+}
+
+.controls .inputs label {
+  display: flex;
+  flex-direction: column;
 }
