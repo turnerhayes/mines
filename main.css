@@ -74,10 +74,10 @@ html {
 }
 
 /* DEBUG */
-.grid td:not(.revealed)::before {
+/* .grid td:not(.revealed)::before {
   content: attr(data-content);
   color: white;
-}
+} */
 /* END DEBUG */
 
 .grid td.flagged::before {
@@ -99,6 +99,10 @@ html {
 .grid.over td.revealed.💣.last-move {
   background-color: red;
   color: white;
+}
+
+.grid.over td.flagged:not(.💣) {
+  color: red;
 }
 
 .mine {

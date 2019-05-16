@@ -30,6 +30,8 @@
     }
   }
 
+  global.Position = Position;
+
   class Cell {
     constructor({
       grid,
@@ -93,7 +95,94 @@
 
       return count;
     }
+
+    _getAdjacentCellsStartAndEnd() {
+      const startRow = Math.max(this.position.row - 1, 0);
+      const endRow = Math.min(
+        this.position.row + 1,
+        this.grid.height - 1
+      );
+      const startColumn = Math.max(this.position.column - 1, 0);
+      const endColumn = Math.min(
+        this.position.column + 1,
+        this.grid.width - 1
+      );
+
+      return {
+        row: [startRow, endRow],
+        column: [startColumn, endColumn],
+      };
+    }
+
+    getAdjacentRevealedCells(skipEmpty = false) {
+      const cells = [];
+
+      const {
+        row: [startRow, endRow],
+        column: [startColumn, endColumn],
+      } = this._getAdjacentCellsStartAndEnd();
+
+      for (let row = startRow; row <= endRow; row++) {
+        for (let column = startColumn; column <= endColumn; column++) {
+          if (
+            row === this.position.row &&
+            column === this.position.column
+          ) {
+            continue;
+          }
+
+          const adjacentCell = this.grid.get([column, row]);
+
+          if (
+            adjacentCell.isRevealed &&
+            (
+              !skipEmpty ||
+              adjacentCell.adjacentMines > 0
+            )
+          ) {
+            cells.push(adjacentCell);
+          }
+        }
+      }
+
+      return cells;
+    }
+
+    countAdjacentUnrevealedCells(skipFlagged) {
+      let count = 0;
+
+      const {
+        row: [startRow, endRow],
+        column: [startColumn, endColumn],
+      } = this._getAdjacentCellsStartAndEnd();
+
+      for (let row = startRow; row <= endRow; row++) {
+        for (let column = startColumn; column <= endColumn; column++) {
+          if (
+            row === this.position.row &&
+            column === this.position.column
+          ) {
+            continue;
+          }
+
+          const adjacentCell = this.grid.get([column, row]);
+
+          if (
+            !adjacentCell.isRevealed &&
+            (
+              !skipFlagged || !adjacentCell.isFlagged
+            )
+          ) {
+            count += 1;
+          }
+        }
+      }
+
+      return count;
+    }
   }
+
+  global.Cell = Cell;
 
   class Grid {
     constructor(width, height) {
@@ -193,7 +282,17 @@
         []
       );
     }
+
+    each(iterator) {
+      for (let row = 0; row < this.height; row++) {
+        for (let column = 0; column < this.width; column++) {
+          iterator(this.get([column, row]), new Position([column, row]));
+        }
+      }
+    }
   }
+
+  global.Grid = Grid;
 
   class Game {
     constructor({
@@ -333,6 +432,10 @@
     }
 
     pressCell(position, isFlagging = false) {
+      if (this.isOver) {
+        return;
+      }
+
       const cell = this.grid.get(position);
 
       if (cell.isRevealed) {
@@ -363,11 +466,7 @@
 
       if (!this.isStarted) {
         if (this.protectFirstClick && cell.content === BOMB) {
-          const newCell = this.grid.moveMine(cell);
-          /// DEBUG
-          delete this._getCellElement(cell).dataset.content;
-          this._getCellElement(newCell).dataset.content = BOMB;
-          /// END DEBUG
+          this.grid.moveMine(cell);
         }
 
         this._started = true;
@@ -383,6 +482,14 @@
 
       if (cellContent === BOMB) {
         this.revealAllCells();
+
+        this.grid.each(
+          (cell) => {
+            if (cell.content === BOMB) {
+              this._getCellElement(cell).classList.add(BOMB);
+            }
+          }
+        );
 
         this._emitter.emit("loss", this);
         this._lost = true;
@@ -404,6 +511,7 @@
       }
 
       if (cell.isFlagged) {
+        if (this.isOver)
         return;
       }
 

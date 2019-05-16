@@ -1,0 +1,22 @@
+{
+  "name": "mineswp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/turnerhayes/mines.git"
+  },
+  "author": "Turner Hayes <dev@turnerhayes.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/turnerhayes/mines/issues"
+  },
+  "homepage": "https://github.com/turnerhayes/mines#readme",
+  "dependencies": {
+    "eventemitter3": "^3.1.2"
+  }
+}
