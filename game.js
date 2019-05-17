@@ -17,6 +17,10 @@
       return `${this.column},${this.row}`;
     }
 
+    toJSON() {
+      return [this.column, this.row];
+    }
+
     static fromString(positionString) {
       return new Position(
         positionString
@@ -36,13 +40,13 @@
     constructor({
       grid,
       position,
-      content,
+      isMine = false,
       isFlagged = false,
       isRevealed = false,
     } = {}) {
       this.grid = grid,
       this.position = position;
-      this.content = content;
+      this.isMine = isMine;
       this.isFlagged = isFlagged;
       this.isRevealed = isRevealed;
 
@@ -86,7 +90,7 @@
               row === this.position.row &&
               column === this.position.column
             ) &&
-            this.grid.get([column, row]).content === BOMB
+            this.grid.get([column, row]).isMine
           ) {
             count += 1;
           }
@@ -180,6 +184,35 @@
 
       return count;
     }
+
+    countAdjacentFlaggedCells() {
+      let count = 0;
+  
+      const {
+        row: [startRow, endRow],
+        column: [startColumn, endColumn],
+      } = this._getAdjacentCellsStartAndEnd();
+  
+      for (let row = startRow; row <= endRow; row++) {
+        for (let column = startColumn; column <= endColumn; column++) {
+          if (
+            row === this.position.row &&
+            column === this.position.column
+          ) {
+            continue;
+          }
+          const adjacentCell = this.grid.get([column, row]);
+          
+          if (
+            adjacentCell.isFlagged
+          ) {
+            count += 1;
+          }
+        }
+      }
+  
+      return count;
+    }
   }
 
   global.Cell = Cell;
@@ -233,7 +266,7 @@
     }
 
     addMineAt(position) {
-      this.get(position).content = BOMB;
+      this.get(position).isMine = true;
     }
 
     moveMine(cell) {
@@ -241,7 +274,7 @@
 
       let newCell = this.get(newPosition);
 
-      while (newCell.content === BOMB) {
+      while (newCell.isMine) {
         let newColNum = newPosition.column + 1;
         let newRowNum = newPosition.row;
 
@@ -255,7 +288,7 @@
       }
       
       this.addMineAt(newPosition);
-      cell.content = undefined;
+      cell.isMine = false;
 
       this._emitter.emit("mine-moved", {
         grid: this,
@@ -266,12 +299,17 @@
       return newCell;
     }
 
-    getUnrevealedCells() {
+    getUnrevealedCells(skipFlagged = false) {
       return this._matrix.reduce(
         function (unrevealed, row) {
           row.forEach(
             function (cell) {
-              if (!cell.isRevealed) {
+              if (
+                !cell.isRevealed && (
+                  !skipFlagged ||
+                  !cell.isFlagged
+                )
+              ) {
                 unrevealed.push(cell);
               }
             }
@@ -366,8 +404,8 @@
           
           /// DEBUG
           const cell = this.grid.get([colNum, rowNum]);
-          if (cell.content) {
-            cellEl.setAttribute("data-content", cell.content);
+          if (cell.isMine) {
+            cellEl.setAttribute("data-content", BOMB);
           }
           else if (cell.adjacentMines > 0) {
             cellEl.setAttribute("data-content", cell.adjacentMines);
@@ -422,7 +460,7 @@
       while (mineNumber < mineCount) {
         const coords = Game._getRandomCoordinates(width, height);
 
-        if (!grid.get(coords).content) {
+        if (!grid.get(coords).isMine) {
           grid.addMineAt(coords);
           mineNumber += 1;
         }
@@ -465,14 +503,14 @@
       }
 
       if (!this.isStarted) {
-        if (this.protectFirstClick && cell.content === BOMB) {
+        if (this.protectFirstClick && cell.isMine) {
           this.grid.moveMine(cell);
         }
 
         this._started = true;
       }
 
-      const cellContent = this.revealCell(cell);
+      const isMine = this.revealCell(cell);
       const currentLastMove = this.table.getElementsByClassName("last-move")[0];
 
       if (currentLastMove) {
@@ -480,12 +518,12 @@
       }
       this._getCellElement(cell).classList.add("last-move");
 
-      if (cellContent === BOMB) {
+      if (isMine) {
         this.revealAllCells();
 
         this.grid.each(
           (cell) => {
-            if (cell.content === BOMB) {
+            if (cell.isMine) {
               this._getCellElement(cell).classList.add(BOMB);
             }
           }
@@ -515,16 +553,18 @@
         return;
       }
 
-      let cellContent = cell.content;
+      let isMine = cell.isMine;
 
       const cellElement = this._getCellElement(cell);
 
-      if (cellContent || cell.adjacentMines) {
+      if (isMine || cell.adjacentMines) {
         const span = document.createElement("span");
         span.classList.add("cell-content");
-        span.textContent = cellContent || cell.adjacentMines;
+        span.textContent = isMine ?
+          BOMB :
+          cell.adjacentMines;
 
-        if (cellContent) {
+        if (isMine) {
           cellElement.classList.add(BOMB);
         }
 
@@ -536,7 +576,7 @@
 
       cell.isRevealed = true;
 
-      return cellContent;
+      return isMine;
     }
 
     revealAllCells() {
@@ -571,9 +611,7 @@
             continue;
           }
 
-          let cellContent = adjacentCell.content;
-
-          if (cellContent === BOMB) {
+          if (adjacentCell.isMine) {
             continue;
           }
 
@@ -598,7 +636,7 @@
             return false;
           }
 
-          if (cell.content !== BOMB) {
+          if (!cell.isMine) {
             return false;
           }
         }

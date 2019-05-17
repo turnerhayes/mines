@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Mineswp</title>
+  <link rel="stylesheet" href="./main.css" />
+  <link rel="stylesheet" href="./ai.css" />
+</head>
+<body>
+  <div class="main">
+    <div class="grid-container">
+      <table class="grid">
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+    <div class="ai-controls paused">
+      <button type="button" class="play-button"></button>
+      <button type="button" class="step-button">⇥</button>
+      <button type="button" class="reload-button">↺</button>
+
+      <div>
+        <label>
+          Strategy: 
+          <select class="strategy-selector">
+            <option value="random" selected>Random</option>
+          </select>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- <script src="https://unpkg.com/ml5@0.1.3/dist/ml5.min.js"></script> -->
+  <script src="./node_modules/eventemitter3/umd/eventemitter3.min.js"></script>
+  <script src="./game.js"></script>
+  <script src="./auto-player.js"></script>
+  <script src="./ai/strategies/random.js"></script>
+  <script src="./ai/strategies/tank.js"></script>
+  <script src="./ai.js"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+.ai-controls.paused .play-button::after {
+  content: "⯈";
+}
+.ai-controls.playing .play-button::after {
+  content: "⏸";
+}
+
+.ai-controls.playing .step-button {
+  display: none;
+}
+
+.ai-controls .reload-button {
+  display: none;
+}
+
+.grid-container.won + .ai-controls .play-button,
+.grid-container.lost + .ai-controls .play-button,
+.grid-container.won + .ai-controls .step-button,
+.grid-container.lost + .ai-controls .step-button {
+  display: none;
+}
+
+.grid-container.won + .ai-controls .reload-button,
+.grid-container.lost + .ai-controls .reload-button {
+  display: block;
+}
+
+.grid .last-move {
+  outline: 3px dotted blue;
+}
